@@ -18,7 +18,7 @@ class AppUser {
   });
 
   Map<String,dynamic> toMap(AppUser user) {
-    var data = Map<String, dynamic>();
+    var data = <String, dynamic>{};
     data['uid'] = user.uid;
     data['name'] = user.name;
     data['email'] = user.email;

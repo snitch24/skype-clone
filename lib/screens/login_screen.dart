@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ms_undraw/ms_undraw.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:skype_clone/screens/bottom_navigation_screen.dart';
@@ -15,7 +16,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final FirebaseRepository _repository = FirebaseRepository();
-  bool isLoginPressed = true;
+  bool isLoginPressed = false;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -28,19 +29,27 @@ class _LoginScreenState extends State<LoginScreen> {
             color: Colors.blue,
           ),
         ),
-        ElevatedButton.icon(
-          onPressed: () => performLogin(),
-          icon: const Icon(FontAwesomeIcons.google),
-          label: const Text("Login"),
-        ),
+        isLoginPressed
+            ? SpinKitChasingDots(
+                size: 30,
+              )
+            : ElevatedButton.icon(
+                onPressed: () => performLogin(),
+                icon: const Icon(FontAwesomeIcons.google),
+                label: const Text("Login"),
+              ),
       ],
     );
   }
 
   void performLogin() async {
+    setState(() {
+      isLoginPressed = true;
+    });
     await _repository.signIn().then((User? user) {
       if (user != null) {
         authenticateUser(user);
+        
       } else {
         debugPrint("there was an error");
       }
@@ -50,6 +59,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void authenticateUser(User user) async {
     _repository.authenticateUser(user).then(
       (isNewUser) {
+        setState(() {
+          isLoginPressed = false;
+        });
         if (isNewUser) {
           _repository.addDataToDb(user).then(
             (value) {
