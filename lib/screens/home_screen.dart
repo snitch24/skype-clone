@@ -20,9 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
             future: _repository.getCurrentUser(),
             builder: (context, AsyncSnapshot<User?> snapshot) {
               if (snapshot.hasData) {
-                return LoginScreen();
-              } else {
                 return BottomNavigationScreen();
+              } else {
+                return LoginScreen();
               }
             }));
   }
