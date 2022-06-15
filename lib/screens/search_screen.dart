@@ -1,11 +1,10 @@
-import 'package:feather_icons/feather_icons.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:ms_undraw/ms_undraw.dart';
 import 'package:skype_clone/firebase/firebase_repository.dart';
+import 'package:skype_clone/screens/chatscreen/chat_screen.dart';
 import 'package:skype_clone/utils/constants.dart';
-import 'package:skype_clone/widgets/appbar.dart';
-import 'package:gradient_app_bar/gradient_app_bar.dart';
+import 'package:skype_clone/widgets/custom_tile.dart';
 
 import '../models/app_user.dart';
 
@@ -19,7 +18,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   FirebaseRepository _repository = FirebaseRepository();
 
-  late List<AppUser> userList;
+  List<AppUser> userList = [];
   String query = "";
   TextEditingController searchController = TextEditingController();
   @override
@@ -38,12 +37,18 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: UniversalVariables.blackColor,
-      appBar: GradientAppBar(
-        gradient: const LinearGradient(
-          colors: [
-            UniversalVariables.gradientColorStart,
-            UniversalVariables.gradientColorEnd
-          ],
+      appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                UniversalVariables.gradientColorStart,
+                UniversalVariables.gradientColorEnd
+              ],
+            ),
+          ),
         ),
         leading: IconButton(
           icon: const Icon(
@@ -65,6 +70,7 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: (value) {
                 setState(() {
                   query = value;
+                  print(query);
                 });
               },
               cursorColor: UniversalVariables.blackColor,
@@ -77,17 +83,23 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: "Search",
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 35,
-                      color: Colors.white),
+                      color: Colors.white.withOpacity(0.4)),
                   suffixIcon: IconButton(
                     onPressed: () {
-                      searchController.clear();
+                      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                        searchController.clear();
+                        setState(() {
+                          query = "";
+                        });
+                      });
                     },
                     icon: const Icon(
-                      FontAwesomeIcons.cross,
+                      FontAwesomeIcons.x,
                       color: Colors.white,
+                      size: 18,
                     ),
                     splashRadius: 20,
                   )),
@@ -95,6 +107,78 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
       ),
+      body: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Suggestions(
+          query: query,
+          userList: userList,
+        ),
+      ),
     );
+  }
+}
+
+class Suggestions extends StatelessWidget {
+  const Suggestions({super.key, required this.query, required this.userList});
+  final String query;
+  final List<AppUser> userList;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<AppUser> suggestionList = query.isEmpty
+        ? []
+        : userList.where((AppUser user) {
+            String getUserName = user.userName!.toLowerCase();
+            String getName = user.name!.toLowerCase();
+            String lowerQuery = query.toLowerCase();
+            bool matchUserName = getUserName.contains(lowerQuery);
+            bool matchName = getName.contains(lowerQuery);
+            return (matchName || matchUserName);
+          }).toList();
+    return suggestionList.isEmpty
+        ? Center(
+            child: UnDraw(
+                illustration: UnDrawIllustration.no_data, color: Colors.blue),
+          )
+        : ListView.builder(
+            itemCount: suggestionList.length,
+            itemBuilder: ((context, index) {
+              AppUser searchedUser = AppUser(
+                uid: suggestionList[index].uid,
+                profilePhoto: suggestionList[index].profilePhoto,
+                name: suggestionList[index].name,
+                userName: suggestionList[index].userName,
+              );
+              return CustomTile(
+                mini: false,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: ((context) =>
+                          ChatScreen(receiver: searchedUser)),
+                    ),
+                  );
+                },
+                onLongPress: () {},
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(searchedUser.profilePhoto!),
+                  backgroundColor: Colors.grey,
+                ),
+                title: Text(
+                  searchedUser.userName!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  searchedUser.name!,
+                  style: const TextStyle(
+                    color: UniversalVariables.greyColor,
+                  ),
+                ),
+              );
+            }),
+          );
   }
 }

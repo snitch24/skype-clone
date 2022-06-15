@@ -1,5 +1,7 @@
 import 'package:feather_icons/feather_icons.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:skype_clone/firebase/firebase_repository.dart';
 import 'package:skype_clone/utils/constants.dart';
 import 'package:skype_clone/utils/utilities.dart';
@@ -9,60 +11,60 @@ import '../../widgets/appbar.dart';
 import '../../widgets/custom_tile.dart';
 import '../../widgets/new_chat_screen_button.dart';
 
-class MessagePage extends StatefulWidget {
+class MessagePage extends StatelessWidget {
   const MessagePage({super.key});
 
   @override
-  State<MessagePage> createState() => _MessagePageState();
-}
-
-final FirebaseRepository _repository = FirebaseRepository();
-
-class _MessagePageState extends State<MessagePage> {
-  late String currentUserId;
-  String initials = "";
-  @override
-  void initState() {
-    super.initState();
-    _repository.getCurrentUser().then((user) => setState(() {
-          currentUserId = user!.uid;
-          initials = Utils.getInitials(user.displayName!);
-        }));
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: const NewChatScreenButton(),
-      backgroundColor: UniversalVariables.blackColor,
-      appBar: CustomAppBar(
-        context,
-        leading: IconButton(
-          splashRadius: 20.0,
-          icon: const Icon(FeatherIcons.bell),
-          onPressed: () {},
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            splashRadius: 20.0,
-            onPressed: () {
-              Navigator.pushNamed(context, '/search_screen');
-            },
-            icon: const Icon(FeatherIcons.search),
-          ),
-          IconButton(
-            splashRadius: 20.0,
-            onPressed: () {},
-            icon: const Icon(
-              FeatherIcons.moreVertical,
-            ),
-          ),
-        ],
-        title: UserCircle(text: initials),
-      ),
-      body: const ChatListContainer(),
-    );
+    String currentUserId;
+    String name = "";
+    FirebaseRepository repository = FirebaseRepository();
+
+    return FutureBuilder<User?>(
+        future: repository.getCurrentUser().then((user) {
+          currentUserId = user!.uid;
+          name = user.displayName!;
+          return user;
+        }),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const SpinKitChasingDots(
+              color: UniversalVariables.blueColor,
+            );
+          } else {
+            return Scaffold(
+              floatingActionButton: const NewChatScreenButton(),
+              backgroundColor: UniversalVariables.blackColor,
+              appBar: CustomAppBar(
+                context,
+                leading: IconButton(
+                  splashRadius: 20.0,
+                  icon: const Icon(FeatherIcons.bell),
+                  onPressed: () {},
+                ),
+                centerTitle: true,
+                actions: [
+                  IconButton(
+                    splashRadius: 20.0,
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/search_screen');
+                    },
+                    icon: const Icon(FeatherIcons.search),
+                  ),
+                  IconButton(
+                    splashRadius: 20.0,
+                    onPressed: () {},
+                    icon: const Icon(
+                      FeatherIcons.moreVertical,
+                    ),
+                  ),
+                ],
+                title: UserCircle(text: name),
+              ),
+              body: const ChatListContainer(),
+            );
+          }
+        });
   }
 }
 
@@ -103,7 +105,7 @@ class _ChatListContainerState extends State<ChatListContainer> {
             constraints: const BoxConstraints(maxHeight: 60, maxWidth: 60),
             child: Stack(
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   maxRadius: 30,
                   backgroundColor: UniversalVariables.greyColor,
                   backgroundImage: NetworkImage(

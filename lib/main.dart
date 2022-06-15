@@ -24,6 +24,11 @@ class MyApp extends StatelessWidget {
         '/home_screen': (context) => const HomeScreen(),
       },
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        )
+      ),
       home: HomeScreen(),
     );
   }

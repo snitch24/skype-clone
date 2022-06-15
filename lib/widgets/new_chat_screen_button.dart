@@ -8,6 +8,8 @@ class NewChatScreenButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 60,
+      width: 60,
       decoration: const BoxDecoration(
         gradient: UniversalVariables.fabGradient,
         shape: BoxShape.circle,
