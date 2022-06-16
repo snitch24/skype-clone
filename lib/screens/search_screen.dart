@@ -20,11 +20,13 @@ class _SearchScreenState extends State<SearchScreen> {
 
   List<AppUser> userList = [];
   String query = "";
+  String _currentUserId = "";
   TextEditingController searchController = TextEditingController();
   @override
   void initState() {
     _repository.getCurrentUser().then((user) {
-      _repository.fetchAllUsers(user!).then((List<AppUser> list) {
+      _currentUserId = user!.uid;
+      _repository.fetchAllUsers(user).then((List<AppUser> list) {
         setState(() {
           userList = list;
         });
@@ -111,7 +113,7 @@ class _SearchScreenState extends State<SearchScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Suggestions(
           query: query,
-          userList: userList,
+          userList: userList, currentUserId: _currentUserId,
         ),
       ),
     );
@@ -119,9 +121,10 @@ class _SearchScreenState extends State<SearchScreen> {
 }
 
 class Suggestions extends StatelessWidget {
-  const Suggestions({super.key, required this.query, required this.userList});
+  const Suggestions({super.key, required this.query, required this.userList, required this.currentUserId});
   final String query;
   final List<AppUser> userList;
+  final String currentUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +157,10 @@ class Suggestions extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: ((context) =>
-                          ChatScreen(receiver: searchedUser)),
+                      builder: ((context) => ChatScreen(
+                            receiver: searchedUser,
+                            currentUserId : currentUserId
+                          )),
                     ),
                   );
                 },

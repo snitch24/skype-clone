@@ -1,8 +1,12 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:skype_clone/models/app_user.dart';
+import 'package:skype_clone/models/message.dart';
 import 'package:skype_clone/utils/utilities.dart';
 
 class FirebaseMethods {
@@ -70,5 +74,20 @@ class FirebaseMethods {
       }
     }
     return users;
+  }
+
+  Future<void> addMessageToDb(
+      Message message, String sender, AppUser receiver) async {
+    Map<String, dynamic> data = message.toMap();
+    await firestore
+        .collection("messages")
+        .doc(message.senderId)
+        .collection(message.receiverId)
+        .add(data);
+    await firestore
+        .collection("messages")
+        .doc(message.receiverId)
+        .collection(message.senderId)
+        .add(data);
   }
 }

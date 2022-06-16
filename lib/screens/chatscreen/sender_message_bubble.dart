@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:skype_clone/utils/constants.dart';
 
 class SenderMessageBubble extends StatelessWidget {
+  final String text;
   const SenderMessageBubble({
-    Key? key,
+    Key? key, required this.text,
   }) : super(key: key);
 
   @override
@@ -24,11 +25,11 @@ class SenderMessageBubble extends StatelessWidget {
           constraints: BoxConstraints(
             maxWidth: MediaQuery.of(context).size.width * 0.65,
           ),
-          child: const Padding(
-            padding: EdgeInsets.all(8.0),
+          child:  Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Text(
-              "Hello",
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              text,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
         ),
