@@ -14,12 +14,12 @@ import 'package:skype_clone/utils/utilities.dart';
 class ChatControls extends StatefulWidget {
   final AppUser receiver;
   final String currentUserId;
-  final void Function(bool) emojiCallBack;
+  
   const ChatControls(
       {super.key,
       required this.receiver,
       required this.currentUserId,
-      required this.emojiCallBack});
+  });
 
   @override
   State<ChatControls> createState() => _ChatControlsState();
@@ -28,11 +28,12 @@ class ChatControls extends StatefulWidget {
 class _ChatControlsState extends State<ChatControls> {
   TextEditingController chatBoxController = TextEditingController();
   bool isWriting = false;
-  bool showEmojiKeyboard = false;
-  final FirebaseRepository _repository = FirebaseRepository();
 
+  final FirebaseRepository _repository = FirebaseRepository();
+  FocusNode focusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
+    //
     return Container(
       padding: const EdgeInsets.all(10),
       child: Row(
@@ -64,93 +65,77 @@ class _ChatControlsState extends State<ChatControls> {
             width: 5,
           ),
           Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                TextField(
-                  controller: chatBoxController,
-                  style: const TextStyle(
-                    color: Colors.white,
-                  ),
-                  onChanged: (value) {
-                    if (value.isNotEmpty && value.trim().isNotEmpty) {
-                      setState(() {
-                        isWriting = true;
-                      });
-                    } else {
-                      setState(() {
-                        isWriting = false;
-                      });
-                    }
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    filled: true,
-                    fillColor: UniversalVariables.separatorColor,
-                    hintText: "Type a message",
-                    hintStyle: const TextStyle(
-                      color: UniversalVariables.greyColor,
-                    ),
-                  ),
+            child: TextField(
+              
+              focusNode: focusNode,
+              controller: chatBoxController,
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+              onChanged: (value) {
+                if (value.isNotEmpty && value.trim().isNotEmpty) {
+                  setState(() {
+                    isWriting = true;
+                  });
+                } else {
+                  setState(() {
+                    isWriting = false;
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(50),
+                  borderSide: BorderSide.none,
                 ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          showEmojiKeyboard = !showEmojiKeyboard;
-                          widget.emojiCallBack(showEmojiKeyboard);
-                        });
-                      },
-                      child: const Icon(
-                        FontAwesomeIcons.faceSmile,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                filled: true,
+                fillColor: UniversalVariables.separatorColor,
+                hintText: "Type a message",
+                hintStyle: const TextStyle(
+                  color: UniversalVariables.greyColor,
                 ),
-              ],
+              ),
             ),
           ),
           isWriting
               ? Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(
                       width: 5,
                     ),
                     Container(
+                      width: 40,
                       padding: const EdgeInsets.all(10),
                       decoration: const BoxDecoration(
                         gradient: UniversalVariables.fabGradient,
                         shape: BoxShape.circle,
                       ),
-                      child: IconButton(
-                        onPressed: () {
-                          String text = chatBoxController.text;
-                          Message message = Message(
-                            message: text,
-                            receiverId: widget.receiver.uid!,
-                            senderId: widget.currentUserId,
-                            type: "text",
-                            timeStamp: Timestamp.now(),
-                          );
-                          setState(() {
-                            isWriting = false;
-                            chatBoxController.clear();
-                          });
-                          _repository.addMessageToDb(
-                              message, widget.currentUserId, widget.receiver);
-                        },
-                        icon: const Icon(
-                          Icons.send,
-                          size: 18,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 250),
+                        child: IconButton(
+                          onPressed: () {
+                            String text = chatBoxController.text;
+                            Message message = Message(
+                              message: text,
+                              receiverId: widget.receiver.uid!,
+                              senderId: widget.currentUserId,
+                              type: "text",
+                              timeStamp: Timestamp.now(),
+                            );
+                            setState(() {
+                              isWriting = false;
+                              chatBoxController.clear();
+                            });
+                            _repository.addMessageToDb(
+                                message, widget.currentUserId, widget.receiver);
+                          },
+                          icon: const Icon(
+                            Icons.send,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),

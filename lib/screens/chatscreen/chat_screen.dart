@@ -25,7 +25,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  bool showEmojiKeyboard = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,70 +67,14 @@ class _ChatScreenState extends State<ChatScreen> {
           ChatControls(
               receiver: widget.receiver,
               currentUserId: widget.currentUserId,
-              emojiCallBack: (showEmoji) {
-                setState(() {
-                  showEmojiKeyboard = showEmoji;
-                });
-              }),
-          showEmojiKeyboard
-              ? const CustomEmojiPicker()
-              : const SizedBox.shrink(),
+            ),
+     
         ],
       ),
     );
   }
 }
 
-class CustomEmojiPicker extends StatelessWidget {
-  const CustomEmojiPicker({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: EmojiPicker(
-        onEmojiSelected: (category, emoji) {
-          // Do something when emoji is tapped
-        },
-        onBackspacePressed: () {
-          // Backspace-Button tapped logic
-          // Remove this line to also remove the button in the UI
-        },
-        config: Config(
-          columns: 7,
-          emojiSizeMax: 32 *
-              (Platform.isIOS
-                  ? 1.30
-                  : 1.0), // Issue: https://github.com/flutter/flutter/issues/28894
-          verticalSpacing: 0,
-          horizontalSpacing: 0,
-          gridPadding: EdgeInsets.zero,
-          initCategory: Category.RECENT,
-          bgColor: UniversalVariables.separatorColor,
-          indicatorColor: UniversalVariables.blueColor,
-          iconColor: Colors.grey,
-          iconColorSelected: Colors.blue,
-          progressIndicatorColor: Colors.blue,
-          backspaceColor: Colors.blue,
-          skinToneDialogBgColor: Colors.white,
-          skinToneIndicatorColor: Colors.grey,
-          enableSkinTones: true,
-          showRecentsTab: true,
-          recentsLimit: 28,
-          noRecents: const Text(
-            'No Recents',
-            style: TextStyle(fontSize: 20, color: Colors.black26),
-            textAlign: TextAlign.center,
-          ),
-          tabIndicatorAnimDuration: kTabScrollDuration,
-          categoryIcons: const CategoryIcons(),
-          buttonMode: ButtonMode.MATERIAL,
-        ),
-      ),
-    );
-  }
-}
 
 class MessageList extends StatefulWidget {
   final AppUser receiver;
